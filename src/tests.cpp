@@ -1,4 +1,4 @@
-#include "tests.h"
+#include "../include/tests.h"
 
 // 练习1，实现库函数strlen
 int my_strlen(char *str) {
@@ -7,7 +7,12 @@ int my_strlen(char *str) {
      */
 
     // IMPLEMENT YOUR CODE HERE
-    return 0;
+    int c = 0;
+    while (str[c] )
+    {
+        c++;
+    }
+    return c;
 }
 
 
@@ -19,6 +24,18 @@ void my_strcat(char *str_1, char *str_2) {
      */
 
     // IMPLEMENT YOUR CODE HERE
+       int i = 0;
+    while(str_1[i])
+    {
+        i++;
+    }
+    int j = 0;
+    while(str_2[j] )
+    {
+        str_1[i+j] = str_2[j];
+        j++;
+    }
+    str_1[i+j] = '\0';
 }
 
 
@@ -31,7 +48,29 @@ char* my_strstr(char *s, char *p) {
      */
 
     // IMPLEMENT YOUR CODE HERE
-    return 0;
+    if (*p == '\0')
+    {
+        return (char*)s;
+    }
+
+    const char* start;   
+    const char* p_s;    
+    const char* p_p;    
+    for (start = s; *start; start++)
+    {
+        p_s = start;   
+        p_p= p;       
+        while (*p_s  && *p_p && *p_s == *p_p)
+        {
+            p_s++;  
+            p_p++; 
+        }
+        if (*p_p == '\0')
+        {
+            return (char*)start;
+        }
+    }
+    return 0; 
 }
 
 
@@ -97,6 +136,16 @@ void rgb2gray(float *in, float *out, int h, int w) {
 
     // IMPLEMENT YOUR CODE HERE
     // ...
+    float *p_in = in;
+    float *p_out = out;
+    for(int i = 0; i < h * w; i++){
+        float R = *(p_in + 0);
+        float G = *(p_in + 1);
+        float B = *(p_in + 2);
+        *p_out = 0.1140 * B + 0.5870 * G + 0.2989 * R;
+        p_in += 3;
+        p_out += 1;
+    }
 }
 
 // 练习5，实现图像处理算法 resize：缩小或放大图像
@@ -199,7 +248,52 @@ void resize(float *in, float *out, int h, int w, int c, float scale) {
     int new_h = h * scale, new_w = w * scale;
     // IMPLEMENT YOUR CODE HERE
 
+    float *p_out = out;  // 输出图像遍历指针，从头开始
+
+    for (int y = 0; y < new_h; y++)
+    {
+        for (int x = 0; x < new_w; x++)
+        {
+            float x0 = x / scale;
+            float y0 = y / scale;
+
+            int x1 = static_cast<int>(x0);
+            int y1 = static_cast<int>(y0);
+            int x2 = x1 + 1;
+            int y2 = y1 + 1;
+
+            float dx = x0 - x1;
+            float dy = y0 - y1;
+
+            if (x1 < 0) x1 = 0;
+            if (y1 < 0) y1 = 0;
+            if (x2 >= w) x2 = w - 1;
+            if (y2 >= h) y2 = h - 1;
+
+            for (int ch = 0; ch < c; ch++)
+            {
+                float *pP1 = in + y2 * w * c + x1 * c + ch;
+                float *pP2 = in + y2 * w * c + x2 * c + ch;
+                float *pP3 = in + y1 * w * c + x1 * c + ch;
+                float *pP4 = in + y1 * w * c + x2 * c + ch;
+
+                float P1 = *pP1;
+                float P2 = *pP2;
+                float P3 = *pP3;
+                float P4 = *pP4;
+
+                float val = P1 * (1 - dx) * (1 - dy)
+                          + P2 * dx * (1 - dy)
+                          + P3 * (1 - dx) * dy
+                          + P4 * dx * dy;
+
+                *p_out = val;
+                p_out++; // 输出指针向后移动一个float
+            }
+        }
+    }
 }
+
 
 
 // 练习6，实现图像处理算法：直方图均衡化
@@ -221,4 +315,34 @@ void hist_eq(float *in, int h, int w) {
      */
 
     // IMPLEMENT YOUR CODE HERE
+    // 注意：输入灰度图像素值范围是 [0, 255]（不是 [0, 1]）
+    int total = h * w;
+    int hist[256] = {0};
+
+    // 1. 统计直方图：统计每个灰度级(0~255)出现的像素个数
+    for (int i = 0; i < total; i++) {
+        int gray = static_cast<int>(in[i] + 0.5f);  // 四舍五入到最近的灰度级
+        if (gray < 0) gray = 0;
+        if (gray > 255) gray = 255;
+        hist[gray]++;
+    }
+
+    // 2. 计算累积分布函数 CDF，并记录最小非零累积值（用于消除暗部偏移）
+    int cdf[256];
+    int cum = 0;
+    int cdf_min = -1;
+    for (int i = 0; i < 256; i++) {
+        cum += hist[i];
+        cdf[i] = cum;
+        if (hist[i] > 0 && cdf_min == -1) cdf_min = cum;
+    }
+
+    // 3. 均衡化：将像素值映射回 [0, 255]
+    float scale = (total - cdf_min > 0) ? 255.0f / (total - cdf_min) : 0.0f;
+    for (int i = 0; i < total; i++) {
+        int gray = static_cast<int>(in[i] + 0.5f);
+        if (gray < 0) gray = 0;
+        if (gray > 255) gray = 255;
+        in[i] = (cdf[gray] - cdf_min) * scale;
+    }
 }

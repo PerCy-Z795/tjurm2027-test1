@@ -1,5 +1,5 @@
-#include "utils.h"
-#include "tests.h"
+#include "include/utils.h"
+#include "include/tests.h"
 #include <iostream>
 #include <cstring>
 
@@ -8,7 +8,7 @@
 
 void test_rgb2gray() {
     std::cout << "开始测试函数 << rgb2gray >> ..." << std::endl;
-    char *path = "../images/rgb2gray/input.jpg";
+    char path[]=  "../images/rgb2gray/input.jpg" ;
     float *img;
     int h, w, c;
 
@@ -20,7 +20,7 @@ void test_rgb2gray() {
     float *gray = fmalloc(h * w);
     rgb2gray(img, gray, h, w);
 
-    char *out_path = "../images/rgb2gray/output.jpg";
+    char out_path[] = "../images/rgb2gray/output.jpg";
     imwrite(out_path, gray, h, w, 1);
     std::cout << "使用你的代码产生的灰度图片已经保存为images/rgb2gray/output.jpg"
               << std::endl
@@ -84,7 +84,7 @@ void test_strcat() {
 void test_strstr() {
     std::cout << "开始测试函数 << my_strstr >> ..." << std::endl;
 
-    char *s = "jaldjqionekqnwjsfjdviozdfaier234WDAJdlDAKDie3j";
+    char s[] = "jaldjqionekqnwjsfjdviozdfaier234WDAJdlDAKDie3j";
     char *p[] = {"wjsfjdvioz", "qqqqq",  "j"};
 
     bool pass = true;
@@ -103,7 +103,7 @@ void test_strstr() {
 
 void test_hist_eq() {
     std::cout << "开始测试函数 << hist_eq >> ..." << std::endl;
-    char *path = "../images/hist_eq/input.jpg";
+    char path[] = "../images/hist_eq/input.jpg";
     float *img;
     int h, w, c;
 
@@ -114,7 +114,7 @@ void test_hist_eq() {
 
     hist_eq(img, h, w);
 
-    char *out_path = "../images/hist_eq/output.jpg";
+    char out_path[] = "../images/hist_eq/output.jpg";
     imwrite(out_path, img, h, w, 1);
     std::cout << "使用你的代码产生的结果已经保存为images/hist_eq/output.jpg"
               << std::endl
@@ -127,7 +127,7 @@ void test_hist_eq() {
 
 
 void test_resize() {
-    char *path = "../images/resize/input.jpg";
+    char path[] = "../images/resize/input.jpg";
     float *img;
     int h, w, c;
 
